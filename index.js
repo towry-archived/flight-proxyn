@@ -11,7 +11,11 @@ const FileBrowser = require('./lib/FileBrowser');
 function FlightProxyn(options) {
 	this.options = options || {};
 	if (this.options.config) {
-		this.config = loadYaml(this.options.config);
+		if (typeof this.options.config !== 'string') {
+			this.config = this.options.config;
+		} else {
+			this.config = loadYaml(this.options.config);
+		}
 	} else {
 		this.config = loadYaml(getConfigPath());
 	}
