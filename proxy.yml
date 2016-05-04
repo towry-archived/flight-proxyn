@@ -1,3 +1,8 @@
 
-remote_url: http://static.moseeker.com
-search_path: ./dist/
+remote_url: "http://static.moseeker.com"
+
+# the search path must be included in the resource request url
+# if the resource request url is `/s1/weixin/assets/cssbin/main-bundle-ms-2ofjlqjfl.css`
+# then the folder struct in the `search_path` must be like `weixin/assets/cssbin/main-bundle.css`
+# or `assets/cssbin/main-bundle.css` or `cssbin/main-bundle.css`
+search_path: "./dist/"
