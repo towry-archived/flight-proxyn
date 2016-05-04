@@ -9,10 +9,14 @@ const FileBrowser = require('./lib/FileBrowser');
 
 
 function FlightProxyn(options) {
-	this.config = loadYaml(getConfigPath());
 	this.options = options || {};
+	if (this.options.config) {
+		this.config = loadYaml(this.options.config);
+	} else {
+		this.config = loadYaml(getConfigPath());
+	}
 
-	this.browser = new FileBrowser('/Users/towry/Projects/mobile-flight/build');
+	this.browser = new FileBrowser(this.config.search_path);
 
 	if (this.config === null) {
 		console.log("config file not exits in current directory");
@@ -59,11 +63,21 @@ FlightProxyn.prototype.requestRemote = function (req, res, cb) {
 	var request_url = url.resolve(this.config.remote_url, parsed.path);
 	console.log(request_url);
 
-	request(request_url, function (error, response, body) {
+	request(request_url, {
+		timeout: 8500
+	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			cb(body);
+		} else {
+			cb(null);
 		}
 	})
+}
+
+FlightProxyn.prototype.run = function () {
+	this.listen(this.options.port, function () {
+		console.log('flight-proxyn is running at :' + this.options.port);
+	}.bind(this));
 }
 
 function getStaticFile(file, err_cb) {
@@ -79,6 +93,11 @@ function onRequest(req, res) {
 	var content = this.requestLocal(req, res);
 	if (!content) {
 		this.requestRemote(req, res, function (body) {
+			if (body === null) {
+				res.writeHead(404);
+				res.end();
+				return;
+			}
 			res.end(body);
 		});
 	} else {
